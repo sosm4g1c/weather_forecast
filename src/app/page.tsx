@@ -1,101 +1,226 @@
-import Image from "next/image";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
+import { useQuery } from "react-query";
+import Navbar from "../../components/Navbar";
+import axios from "axios";
+import { format, fromUnixTime, parseISO } from "date-fns";
+import Container from "../../components/Container";
+import { convertKToCDegree } from "../../utils/convertKToCDegree";
+import WeatherIcons from "../../components/WeatherIcons";
+import { getDayOrNightIcon } from "../../utils/getDayOrNightIcon";
+import WeatherDetail from "../../components/WeatherDetail";
+import { metToKilomet } from "../../utils/metToKilomet";
+import { loadingAtom, placeAtom } from "./atom";
+import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+// import RealTimeClock from "../../components/RealTimeClock";
+
+type WeatherData = {
+  dt: number;
+  main: {
+    temp: number;
+    feels_like: number;
+    temp_min: number;
+    temp_max: number;
+    pressure: number;
+    sea_level: number;
+    grnd_level: number;
+    humidity: number;
+    temp_kf: number;
+  };
+  weather: {
+    id: number;
+    main: string;
+    description: string;
+    icon: string;
+  }[];
+  clouds: {
+    all: number;
+  };
+  wind: {
+    speed: number;
+    deg: number;
+    gust: number;
+  };
+  visibility: number;
+  pop: number;
+  sys: {
+    pod: string;
+  };
+  dt_txt: string;
+};
+
+type CityData = {
+  id: number;
+  name: string;
+  coord: {
+    lat: number;
+    lon: number;
+  };
+  country: string;
+  population: number;
+  timezone: number;
+  sunrise: number;
+  sunset: number;
+};
+
+type WeatherResponse = {
+  cod: string;
+  message: number;
+  cnt: number;
+  list: WeatherData[];
+  city: CityData;
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [place, setPlace] = useAtom(placeAtom);
+  const [loadingcity, setLoadingCity] = useAtom(loadingAtom);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { isLoading, data, error, refetch } = useQuery<WeatherResponse>(
+    ["repoData"],
+    async () => {
+      const { data } = await axios.get(
+        `https://pro.openweathermap.org/data/2.5/forecast?q=${place}&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}&cnt=56`
+      );
+      return data;
+    }
+  );
+  useEffect(() => {
+    refetch();
+  }, [place, refetch]);
+
+  // console.log(data);
+  const firstData = data?.list[0] ?? null;
+  // console.log(firstData?.sys.pod);
+  if (isLoading)
+    return (
+      <div className="flex items-center min-h-screen justify-center">
+        <p className="animate-bounce">Đang TảiTải...</p>
+      </div>
+    );
+
+  return (
+    <div
+      className="flex flex-col gap-4 min-h-screen"
+      style={{ backgroundColor: "#e4eaf2" }}
+    >
+      <Navbar location={data?.city.name ?? ""} />
+      <main className="px-3 max-w-7xl mx-auto flex flex-col gap-9 w-full pb-10 pt-4">
+        {loadingcity ? <WeatherSkeleton /> : 
+        <>
+          {/* {Phan du bao thoi tiet hom nay } */}
+          <section className="space-y-4">
+            <div className="space-y-2">
+              <Container className="gap-10 px-6 items-center rounded-md ">
+                {/* thoi gian va icon  */}
+                <div className="flex gap-10 sm:gap-16 overflow-x-auto w-full justify-between pr-3">
+                  {data?.list.map((data, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col justify-between gap-2 items-center text-s font-semibold"
+                    >
+                      <p className="whitespace-nowrap text-sm font-medium ">
+                        {format(parseISO(data.dt_txt), "dd/MM/yyyy")}
+                      </p>
+                      <p className="whitespace-nowrap text-xs text-gray-500">
+                        {format(parseISO(data.dt_txt), "h:mm a")}
+                      </p>
+                      <WeatherIcons
+                        iconName={getDayOrNightIcon(
+                          data.weather[0].icon,
+                          data.dt_txt
+                        )}
+                      />
+                      <p>{convertKToCDegree(data?.main.temp ?? 0)}°</p>
+                    </div>
+                  ))}
+                </div>
+              </Container>
+            </div>
+            <div className="flex gap-4">
+              {/* left  */}
+              <Container className="w-1/2 justify-center flex-col px-4 items-center rounded-md">
+                <h2 className="flex gap-1 text-2xl items-end">
+                  <p>{format(parseISO(firstData?.dt_txt ?? ""), "EEEE")}</p>
+                  <p className="text-lg">
+                    ({format(parseISO(firstData?.dt_txt ?? ""), "dd.MM.yyyy")})
+                  </p>
+                </h2>
+                <WeatherIcons
+                  iconName={getDayOrNightIcon(
+                    firstData?.weather[0].icon ?? "",
+                    firstData?.dt_txt ?? ""
+                  )}
+                />
+                <div className="flex flex-col px-4 my-5 flex flex-col items-center">
+                  {/* nhiet do  */}
+                  <span className="text-5xl ">
+                    {convertKToCDegree(firstData?.main.temp ?? 0)}°
+                  </span>
+                  <p className="text-s text-gray-600 my-2">
+                    Độ ẩm: {firstData?.main.humidity ?? 0}%
+                  </p>
+                  <p className="text-s space-x-2 ">
+                    <span>
+                      {" "}
+                      {convertKToCDegree(firstData?.main.temp_min ?? 0)}°↓{""}
+                    </span>
+                    <span>
+                      {" "}
+                      {""} {convertKToCDegree(firstData?.main.temp_max ?? 0)}°↑
+                    </span>
+                  </p>
+                </div>
+              </Container>
+              {/* right  */}
+              <Container className=" w-1/2 px-6 grid grid-cols-2 gap-4 rounded-md">
+                <WeatherDetail
+                  visability={metToKilomet(firstData?.visibility ?? 100000)}
+                  humidity={`${firstData?.main.humidity}%`}
+                  windSpeed={`${firstData?.wind.speed} km/h`}
+                  airPressure={`${firstData?.main.pressure} hPa`}
+                  sunrise={format(
+                    fromUnixTime(data?.city.sunrise ?? 1702949452),
+                    "H.mm a"
+                  )}
+                  sunset={format(
+                    fromUnixTime(data?.city.sunset ?? 1702949452),
+                    "H.mm a"
+                  )}
+                />
+              </Container>
+            </div>
+          </section>
+        </>}
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
+  );
+}
+
+function WeatherSkeleton() {
+  return (
+    <section className="space-y-8 ">
+      {/* Today's data skeleton */}
+      <div className="space-y-2 animate-pulse">
+        {/* Date skeleton */}
+        <div className="flex gap-1 text-2xl items-end ">
+          <div className="h-6 w-24 bg-gray-300 rounded"></div>
+          <div className="h-6 w-24 bg-gray-300 rounded"></div>
+        </div>
+
+        {/* Time wise temperature skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((index) => (
+            <div key={index} className="flex flex-col items-center space-y-2">
+              <div className="h-6 w-16 bg-gray-300 rounded"></div>
+              <div className="h-6 w-6 bg-gray-300 rounded-full"></div>
+              <div className="h-6 w-16 bg-gray-300 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
