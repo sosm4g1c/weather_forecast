@@ -1,24 +1,51 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { MdWbSunny, MdMyLocation, MdLocationOn } from "react-icons/md";
 import Searchbox from "./SearchBox";
 import axios from "axios";
 import { loadingAtom, placeAtom } from "@/app/atom";
 import { useAtom } from "jotai";
 import { ca } from "date-fns/locale";
+import { Router } from "next/router";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type Props = { location?: string };
 
 export default function Navbar({ location = "Ho Chi Minh" }: Props) {
-  // const { location } = props;
+  
   const [city, setCity] = useState("");
   const [error, setError] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [place, setPlace] = useAtom(placeAtom);
   const [_, setLoadingCity] = useAtom(loadingAtom);
+  const [locale, setLocale] = useState<string>("");
+  const router = useRouter();
+  const t = useTranslations("Header");
+
+  useEffect(() => {
+    const cookieLocale = document.cookie
+      .split(";")
+      .find((row) => row.startsWith("MYNEXTAPP_LOCALE="))
+      ?.split("=")[1];
+    if (cookieLocale) {
+      setLocale(cookieLocale);
+    } else {
+      const browserLocale = navigator.language.slice(0, 2);
+      setLocale(browserLocale);
+      document.cookie = `MYNEXTAPP_LOCALE=${browserLocale}`;
+      router.refresh();
+    }
+  }, [router]);
+
+  const changeLocale = (newLocale: string) => {
+    setLocale(newLocale);
+    document.cookie = `MYNEXTAPP_LOCALE=${newLocale}`;
+    router.refresh();
+  };
 
   useEffect(() => {
     if (city.length < 3) {
@@ -114,10 +141,32 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
       <nav className="shadow-sm sticky top-0 left-0 z-50 bg-white">
         <div className="h-[80px] w-full flex justify-between items-center max-w-7xl px-3 mx-auto">
           <div className="flex items-center justify-center gap-2">
-            <h2 className="text-gray-500 text-3xl">Weather</h2>
+            <h2 className="text-gray-500 text-3xl">{t("title")}</h2>
             <MdWbSunny className="text-3xl mt-1 text-yellow-300" />
           </div>
           <section className="flex gap-2 items-center">
+            
+            {/* <LanguageSwitch /> */}
+            <button
+              onClick={() => changeLocale("vi")}
+              className={`border p-2 font-bold rounded-md text-sm transition cursor-pointer ${
+                locale === "vi"
+                  ? "bg-blue-500 text-white border-blue-500"
+                  : "bg-white text-black"
+              }`}
+            >
+              VN
+            </button>
+            <button
+              onClick={() => changeLocale("en")}
+              className={`border p-2 font-bold rounded-md text-sm transition  cursor-pointer ${
+                locale === "en"
+                  ? "bg-blue-500 text-white border-blue-500"
+                  : "bg-white text-black"
+              }`}
+            >
+              EN
+            </button>
             <MdMyLocation
               title="Dùng vị trí hiện tại"
               onClick={handleCurrentLocation}
@@ -156,7 +205,7 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
           />
         </div>
       </section>
-    </> 
+    </>
   );
 }
 
@@ -173,7 +222,7 @@ function SuggestionsBox({
 }) {
   return (
     <>
-      {(showSuggestions  || error) && (
+      {(showSuggestions || error) && (
         <ul className="mb-4 bg-white absolute border top-[44px] left-0 border-gray-300 rounded-md min-w-[200px]  flex flex-col gap-1 py-2 px-2">
           {error && suggestions.length < 1 && (
             <li className="text-red-500 p-1">{error}</li>

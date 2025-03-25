@@ -1,0 +1,15 @@
+{
+  "Header": {
+    "title":"Weather Forecast",
+    "search": "Search Location..."
+  },
+
+  "HomePage": {
+    "visibility": "Visibility",
+    "humidity": "Humidity",
+    "wind_speed": "Wind Speed",
+    "air_pressure": "Air Pressure",
+    "sunrise": "Sunrise",
+    "sunset": "Sunset"
+  }
+}

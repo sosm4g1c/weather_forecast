@@ -14,11 +14,6 @@ const RealTimeClock = () => {
 
   return (
     <div className="w-fit flex flex-col items-center px-4">
-      {/* Hiển thị ngày tháng */}
-      {/* <p className="text-lg">
-        ({format(currentTime, "dd.MM.yyyy")})
-      </p>
-       */}
       {/* Đồng hồ chạy real-time */}
       <p className="text-2xmd ">
         {format(currentTime, "HH:mm:ss a")}

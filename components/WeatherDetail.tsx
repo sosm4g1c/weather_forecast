@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { FiDroplet } from "react-icons/fi";
 import { ImMeter } from "react-icons/im";
 import { LuEye } from "react-icons/lu";
 import { MdAir } from "react-icons/md";
 import { WiSunrise, WiSunset } from "react-icons/wi";
+// import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 
 export interface WeatherDetailProps {
   visability: string;
@@ -23,36 +26,38 @@ export default function WeatherDetail(props: WeatherDetailProps) {
     sunrise = "6:20",
     sunset = "18.20",
   } = props;
+  const t = useTranslations("HomePage");
+  console.log(t("visibility")); // Kiểm tra xem có nhận được chuỗi dịch không
   return (
     <>
       <SingleWeatherDetails
         icon={<LuEye />}
-        information="Visability"
+        information={t("visibility")}
         value={props.visability}
       />
       <SingleWeatherDetails
         icon={<FiDroplet />}
-        information="Humidity"
+        information={t("humidity")}
         value={props.humidity}
       />
       <SingleWeatherDetails
         icon={<MdAir />}
-        information="Windspeed"
+        information={t("wind_speed")}
         value={props.windSpeed}
       />
       <SingleWeatherDetails
         icon={<ImMeter />}
-        information="Airpressure"
+        information={t("air_pressure")}
         value={props.airPressure}
       />
       <SingleWeatherDetails
         icon={<WiSunrise />}
-        information="Sunrise"
+        information={t("sunrise")}
         value={props.sunrise}
       />
       <SingleWeatherDetails
         icon={<WiSunset />}
-        information="Sunset"
+        information={t("sunset")}
         value={props.sunset}
       />
     </>

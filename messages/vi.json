@@ -1,0 +1,15 @@
+{
+  "Header": {
+    "title": "Dự Báo Thời Tiết",
+    "search": "Tìm kiếm vị trí..."
+  },
+
+  "HomePage": {
+    "visibility": "Tầm nhìn",
+    "humidity": "Độ ẩm",
+    "wind_speed": "Tốc độ gió",
+    "air_pressure": "Áp suất",
+    "sunrise": "Mặt trời mọc",
+    "sunset": "Mặt trời lặn"
+  }
+}

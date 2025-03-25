@@ -1,6 +1,7 @@
 import React from "react";
 import { IoSearch } from "react-icons/io5";
 import { cn } from "../utils/cn";
+import { useTranslations } from "next-intl";
 type Props = {
   className?: string;
   value: string;
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export default function Searchbox(props: Props) {
+  const t = useTranslations("Header");
   return (
     <form
       onSubmit={props.onSubmit}
@@ -21,7 +23,7 @@ export default function Searchbox(props: Props) {
         type="text"
         onChange={props.onChange}
         value={props.value}
-        placeholder="Tìm kiếm vị trí"
+        placeholder={t("search")}
         className="px-4 py-2 w-[230px] border 
       border-gray-300 rounded-l-md 
       focus:outline-none 
