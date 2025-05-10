@@ -5,7 +5,6 @@ import { ImMeter } from "react-icons/im";
 import { LuEye } from "react-icons/lu";
 import { MdAir } from "react-icons/md";
 import { WiSunrise, WiSunset } from "react-icons/wi";
-// import { useTranslation } from "next-i18next";
 import { useTranslations } from "next-intl";
 
 export interface WeatherDetailProps {
@@ -27,7 +26,7 @@ export default function WeatherDetail(props: WeatherDetailProps) {
     sunset = "18.20",
   } = props;
   const t = useTranslations("HomePage");
-  console.log(t("visibility")); // Kiểm tra xem có nhận được chuỗi dịch không
+  // console.log(t("visibility")); // Kiểm tra xem có nhận được chuỗi dịch không
   return (
     <>
       <SingleWeatherDetails

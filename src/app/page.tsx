@@ -13,7 +13,7 @@ import { getDayOrNightIcon } from "../../utils/getDayOrNightIcon";
 import WeatherDetail from "../../components/WeatherDetail";
 import { metToKilomet } from "../../utils/metToKilomet";
 import { loadingAtom, placeAtom } from "./atom";
-import { use, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { useTranslations } from "next-intl";
 
@@ -75,8 +75,6 @@ type WeatherResponse = {
 };
 
 export default function Home() {
-  // const t = useTranslation("HomePage");
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [place, setPlace] = useAtom(placeAtom);
   const [loadingcity, setLoadingCity] = useAtom(loadingAtom);
@@ -91,6 +89,8 @@ export default function Home() {
       return data;
     }
   );
+  // console.log(data);
+  
   useEffect(() => {
     refetch();
   }, [place, refetch]);
@@ -115,7 +115,7 @@ export default function Home() {
       <Navbar location={data?.city.name ?? ""} />
       <main className="px-3 max-w-7xl mx-auto flex flex-col gap-9 w-full pb-10 pt-4">
         {loadingcity ? (
-          <WeatherSkeleton />
+          <></>
         ) : (
           <>
             {/* {Phan du bao thoi tiet hom nay } */}
@@ -151,7 +151,6 @@ export default function Home() {
                 {/* left  */}
                 <Container className="w-1/2 justify-center flex-col px-4 items-center rounded-md">
                   <h2 className="flex gap-1 text-2xl items-end">
-                    {/* <p>{format(parseISO(firstData?.dt_txt ?? ""), "EEEE")}</p> */}
                     <p>
                       {format(parseISO(firstData?.dt_txt ?? ""), "EEEE", {
                         locale: dateLocale,
@@ -168,7 +167,7 @@ export default function Home() {
                       firstData?.dt_txt ?? ""
                     )}
                   />
-                  <div className="flex flex-col px-4 my-5 flex flex-col items-center">
+                  <div className="flex flex-col px-4 my-5  items-center">
                     {/* nhiet do  */}
                     <span className="text-5xl ">
                       {convertKToCDegree(firstData?.main.temp ?? 0)}°
@@ -215,31 +214,6 @@ export default function Home() {
   );
 }
 
-function WeatherSkeleton() {
-  return (
-    <section className="space-y-8 ">
-      {/* Today's data skeleton */}
-      <div className="space-y-2 animate-pulse">
-        {/* Date skeleton */}
-        <div className="flex gap-1 text-2xl items-end ">
-          <div className="h-6 w-24 bg-gray-300 rounded"></div>
-          <div className="h-6 w-24 bg-gray-300 rounded"></div>
-        </div>
-
-        {/* Time wise temperature skeleton */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((index) => (
-            <div key={index} className="flex flex-col items-center space-y-2">
-              <div className="h-6 w-16 bg-gray-300 rounded"></div>
-              <div className="h-6 w-6 bg-gray-300 rounded-full"></div>
-              <div className="h-6 w-16 bg-gray-300 rounded"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 function useTranslation(arg0: string) {
   throw new Error("Function not implemented.");
 }

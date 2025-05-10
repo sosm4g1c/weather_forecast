@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <QueryClientProvider client={queryClient}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages} timeZone="Asia/Ho_Chi_Minh">
           {children}
         </NextIntlClientProvider>
       </body>

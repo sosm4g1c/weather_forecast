@@ -1,25 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { MdWbSunny, MdMyLocation, MdLocationOn } from "react-icons/md";
 import Searchbox from "./SearchBox";
 import axios from "axios";
 import { loadingAtom, placeAtom } from "@/app/atom";
 import { useAtom } from "jotai";
-import { ca } from "date-fns/locale";
-import { Router } from "next/router";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 type Props = { location?: string };
 
 export default function Navbar({ location = "Ho Chi Minh" }: Props) {
-  
   const [city, setCity] = useState("");
   const [error, setError] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [place, setPlace] = useAtom(placeAtom);
   const [_, setLoadingCity] = useAtom(loadingAtom);
   const [locale, setLocale] = useState<string>("");
@@ -50,7 +46,7 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
   useEffect(() => {
     if (city.length < 3) {
       setSuggestions([]);
-      setShowSuggestions(false);
+
       setError("");
       return;
     }
@@ -64,7 +60,7 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
 
         if (response.data.length === 0) {
           setSuggestions([]);
-          setShowSuggestions(false);
+
           setError("Không tìm thấy kết quả nào");
         } else {
           setSuggestions(
@@ -73,24 +69,18 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
                 `${city.name}, ${city.country}`
             )
           );
-          setShowSuggestions(true);
+
           setError("");
         }
       } catch {
         setError("Lỗi kết nối, vui lòng thử lại!");
         setSuggestions([]);
-        setShowSuggestions(false);
       }
     };
 
     const delay = setTimeout(fetchSuggestions, 500);
     return () => clearTimeout(delay);
   }, [city]);
-
-  function handleSuggestionClick(value: string) {
-    setCity(value);
-    setShowSuggestions(false);
-  }
 
   function handleSubmitSearch(e: React.FormEvent<HTMLFormElement>) {
     setLoadingCity(true);
@@ -108,33 +98,33 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
       setTimeout(() => {
         setLoadingCity(false);
         setPlace(city);
-        setShowSuggestions(false);
+        // setShowSuggestions(false);
       }, 500);
     }
   }
 
-  function handleCurrentLocation() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const { latitude, longitude } = position.coords;
-        try {
-          setLoadingCity(true);
-          const respone = await axios.get(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}`
-          );
+  // function handleCurrentLocation() {
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(async (position) => {
+  //       const { latitude, longitude } = position.coords;
+  //       try {
+  //         setLoadingCity(true);
+  //         const respone = await axios.get(
+  //           `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}`
+  //         );
 
-          setTimeout(() => {
-            setLoadingCity(false);
-            setPlace(respone.data.name);
-            setCity("");
-          }, 500);
-        } catch (error) {
-          setLoadingCity(false);
-          console.log(error);
-        }
-      });
-    }
-  }
+  //         setTimeout(() => {
+  //           setLoadingCity(false);
+  //           setPlace(respone.data.name);
+  //           setCity("");
+  //         }, 500);
+  //       } catch (error) {
+  //         setLoadingCity(false);
+  //         console.log(error);
+  //       }
+  //     });
+  //   }
+  // }
 
   return (
     <>
@@ -145,7 +135,6 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
             <MdWbSunny className="text-3xl mt-1 text-yellow-300" />
           </div>
           <section className="flex gap-2 items-center">
-            
             {/* <LanguageSwitch /> */}
             <button
               onClick={() => changeLocale("vi")}
@@ -167,11 +156,11 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
             >
               EN
             </button>
-            <MdMyLocation
+            {/* <MdMyLocation
               title="Dùng vị trí hiện tại"
-              onClick={handleCurrentLocation}
+              // onClick={handleCurrentLocation}
               className="text-2xl text-gray-400 hover:opacity-80 cursor-pointer"
-            />
+            /> */}
             <MdLocationOn className="text-3xl" />
             <p className="text-gray-900/80 text-sm">{location}</p>
             <div className="relative hidden md:flex">
@@ -179,12 +168,6 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 onSubmit={handleSubmitSearch}
-              />
-              <SuggestionsBox
-                showSuggestions={showSuggestions}
-                suggestions={suggestions}
-                handleSuggestionClick={handleSuggestionClick}
-                error={error}
               />
             </div>
           </section>
@@ -197,47 +180,8 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
             onChange={(e) => setCity(e.target.value)}
             onSubmit={handleSubmitSearch}
           />
-          <SuggestionsBox
-            showSuggestions={showSuggestions}
-            suggestions={suggestions}
-            handleSuggestionClick={handleSuggestionClick}
-            error={error}
-          />
         </div>
       </section>
-    </>
-  );
-}
-
-function SuggestionsBox({
-  showSuggestions,
-  suggestions,
-  handleSuggestionClick,
-  error,
-}: {
-  showSuggestions: boolean;
-  suggestions: string[];
-  handleSuggestionClick: (item: string) => void;
-  error: string;
-}) {
-  return (
-    <>
-      {(showSuggestions || error) && (
-        <ul className="mb-4 bg-white absolute border top-[44px] left-0 border-gray-300 rounded-md min-w-[200px]  flex flex-col gap-1 py-2 px-2">
-          {error && suggestions.length < 1 && (
-            <li className="text-red-500 p-1">{error}</li>
-          )}
-          {suggestions.map((item, i) => (
-            <li
-              key={i}
-              onClick={() => handleSuggestionClick(item)}
-              className="cursor-pointer p-1 rounded hover:bg-gray-200"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
-      )}
     </>
   );
 }
