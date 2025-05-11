@@ -72,17 +72,19 @@ export interface SingleWeatherDetailsProps {
 function SingleWeatherDetails(props: SingleWeatherDetailsProps) {
   return (
     <div className="w-full border-collapse ">
-      <tbody>
-        <tr className="align-middle">
-          <td className=" min-w-[84px] font-semibold whitespace-nowrap transform translate-y-2/3">
-            {props.information}
-          </td>
-          <td className="w-4/5   flex items-center gap-2 mx-5 text-center transform translate-y-2/3">
-            <div className="text-3xl">{props.icon}</div>
-            <p className="text-s font-semibold">{props.value}</p>
-          </td>
-        </tr>
-      </tbody>
+      <table>
+        <tbody>
+          <tr className="align-middle">
+            <td className=" min-w-[84px] font-semibold whitespace-nowrap transform translate-y-2/3">
+              {props.information}
+            </td>
+            <td className="w-4/5   flex items-center gap-2 mx-5 text-center transform translate-y-2/3">
+              <div className="text-3xl">{props.icon}</div>
+              <p className="text-s font-semibold">{props.value}</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }

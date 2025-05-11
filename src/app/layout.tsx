@@ -1,4 +1,4 @@
-import ServerLayout from "./ServerLayout";
+// import ServerLayout from "./ServerLayout";
 import RootLayout from "./RootLayout";
 import { getMessages, getLocale } from "next-intl/server";
 
@@ -11,10 +11,10 @@ export default async function Layout({
   const locale = await getLocale(); // Thêm getLocale()
 
   return (
-    <ServerLayout>
+    // <ServerLayout>
       <RootLayout messages={messages} locale={locale}>
         {children}
       </RootLayout>
-    </ServerLayout>
+    // </ServerLayout>
   );
 }

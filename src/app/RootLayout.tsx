@@ -20,6 +20,7 @@ export default function RootLayout({
   locale: string; // Định nghĩa kiểu dữ liệu cho locale
 }) {
   return (
+    <html>
     <QueryClientProvider client={queryClient}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider locale={locale} messages={messages} timeZone="Asia/Ho_Chi_Minh">
@@ -27,5 +28,6 @@ export default function RootLayout({
         </NextIntlClientProvider>
       </body>
     </QueryClientProvider>
+    </html>
   );
 }
