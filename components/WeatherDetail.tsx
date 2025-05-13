@@ -26,7 +26,7 @@ export default function WeatherDetail(props: WeatherDetailProps) {
     sunset = "18.20",
   } = props;
   const t = useTranslations("HomePage");
-  // console.log(t("visibility")); // Kiểm tra xem có nhận được chuỗi dịch không
+ 
   return (
     <>
       <SingleWeatherDetails

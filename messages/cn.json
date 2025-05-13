@@ -1,0 +1,15 @@
+{
+  "Header": {
+    "title": "天气预报",
+    "search": "搜索地点..."
+  },
+
+  "HomePage": {
+    "visibility": "能见度",
+    "humidity": "湿度",
+    "wind_speed": "风速",
+    "air_pressure": "气压",
+    "sunrise": "日出",
+    "sunset": "日落"
+  }
+}

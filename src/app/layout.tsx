@@ -1,4 +1,6 @@
 // import ServerLayout from "./ServerLayout";
+
+// (SSver)layout để láy locale và message để truyền qua cho phía clien là RootLayout
 import RootLayout from "./RootLayout";
 import { getMessages, getLocale } from "next-intl/server";
 
@@ -11,10 +13,8 @@ export default async function Layout({
   const locale = await getLocale(); // Thêm getLocale()
 
   return (
-    // <ServerLayout>
       <RootLayout messages={messages} locale={locale}>
         {children}
       </RootLayout>
-    // </ServerLayout>
   );
 }

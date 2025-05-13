@@ -13,118 +13,111 @@ import { useTranslations } from "next-intl";
 type Props = { location?: string };
 
 export default function Navbar({ location = "Ho Chi Minh" }: Props) {
-  const [city, setCity] = useState("");
-  const [error, setError] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [place, setPlace] = useAtom(placeAtom);
-  const [_, setLoadingCity] = useAtom(loadingAtom);
-  const [locale, setLocale] = useState<string>("");
-  const router = useRouter();
-  const t = useTranslations("Header");
 
-  useEffect(() => {
-    const cookieLocale = document.cookie
-      .split(";")
-      .find((row) => row.startsWith("MYNEXTAPP_LOCALE="))
-      ?.split("=")[1];
-    if (cookieLocale) {
-      setLocale(cookieLocale);
-    } else {
-      const browserLocale = navigator.language.slice(0, 2);
-      setLocale(browserLocale);
-      document.cookie = `MYNEXTAPP_LOCALE=${browserLocale}`;
-      router.refresh();
-    }
-  }, [router]);
+// 1. Lấy thành phố từ ô Search 
+// Sau khi nhập thành phố, gán giá trí mới nhập cho city
+const [city, setCity] = useState("");
 
-  const changeLocale = (newLocale: string) => {
-    setLocale(newLocale);
-    document.cookie = `MYNEXTAPP_LOCALE=${newLocale}`;
+// hook kiểm soát lỗi
+const [error, setError] = useState("");
+
+
+// Lấy atom quản lý loading và địa điểm hiện tại
+const [place, setPlace] = useAtom(placeAtom);
+const [_, setLoadingCity] = useAtom(loadingAtom);
+
+// Đa ngôn ngữ
+const [locale, setLocale] = useState<string>("");
+const router = useRouter();
+const t = useTranslations("Header");
+
+// 2. Khi component được mount, kiểm tra và thiết lập ngôn ngữ lưu trữ bằng cookie
+useEffect(() => {
+  
+  //lấy giá trị locale từ cookie
+  // Tách chuỗi và lấy phần dữ liệu bắt đầu với "MYNEXTAPP_LOCALE="
+  const cookieLocale = document.cookie
+    .split(";")
+    .find((row) => row.startsWith("MYNEXTAPP_LOCALE="))
+    ?.split("=")[1];
+
+  // Nếu MYNEXTAPP_LOCALE= đã có trong cookie thì gán luôn 
+  if (cookieLocale) {
+    setLocale(cookieLocale);
+  } else {
+  // không thì 
+  // Lấy ngôn ngữ mặc định của trình duyệt (ví dụ: "vi", "en", ...)
+    const browserLocale = navigator.language.slice(0, 2);
+  // Cập nhật ngôn ngữ cho giao diện ứng dụng
+    setLocale(browserLocale);
+  // Lưu ngôn ngữ này vào cookie để nhớ cho lần truy cập sau
+    document.cookie = `MYNEXTAPP_LOCALE=${browserLocale}`;
+  // Làm mới trang để áp dụng ngôn ngữ mới vào giao diện
     router.refresh();
-  };
+  }
+}, [router]);
 
-  useEffect(() => {
-    if (city.length < 3) {
-      setSuggestions([]);
 
-      setError("");
-      return;
-    }
 
-    const fetchSuggestions = async () => {
-      console.log(city);
-      try {
-        const response = await axios.get(
-          `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}`
-        );
+// Hàm thay đổi locale và lưu vào cookie
+const changeLocale = (newLocale: string) => {
+  setLocale(newLocale);
+  document.cookie = `MYNEXTAPP_LOCALE=${newLocale}`;
+  router.refresh();
+};
 
-        if (response.data.length === 0) {
-          setSuggestions([]);
 
-          setError("Không tìm thấy kết quả nào");
-        } else {
-          setSuggestions(
-            response.data.map(
-              (city: { name: string; country: string }) =>
-                `${city.name}, ${city.country}`
-            )
-          );
 
-          setError("");
-        }
-      } catch {
-        setError("Lỗi kết nối, vui lòng thử lại!");
-        setSuggestions([]);
-      }
-    };
+// 3. Hàm xử lý Submitsearch 
+function handleSubmitSearch(e: React.FormEvent<HTMLFormElement>) {
+  setLoadingCity(true);
+  // Ngăn hành vi tải lại trang
+  e.preventDefault();
 
-    const delay = setTimeout(fetchSuggestions, 500);
-    return () => clearTimeout(delay);
-  }, [city]);
-
-  function handleSubmitSearch(e: React.FormEvent<HTMLFormElement>) {
-    setLoadingCity(true);
-    e.preventDefault();
-    if (city.trim() === "") {
-      setError("Vui lòng nhập thành phố hợp lệ!");
-      return;
-    }
-
-    if (suggestions.length === 0) {
-      setError("Không tìm thấy kết quả nào");
-      setLoadingCity(false);
-    } else {
-      setError("");
-      setTimeout(() => {
-        setLoadingCity(false);
-        setPlace(city);
-        // setShowSuggestions(false);
-      }, 500);
-    }
+  // Kiểm tra dữ liệu được nhập vào ô Search có nội dung không 
+  if (city.trim() === "") {
+    // không thì báo lỗi
+    setError("Vui lòng nhập thành phố hợp lệ!");
+    setLoadingCity(false);
+    // console.log(error);
+    alert(error);
+    return;
   }
 
-  // function handleCurrentLocation() {
-  //   if (navigator.geolocation) {
-  //     navigator.geolocation.getCurrentPosition(async (position) => {
-  //       const { latitude, longitude } = position.coords;
-  //       try {
-  //         setLoadingCity(true);
-  //         const respone = await axios.get(
-  //           `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}`
-  //         );
+  // Kiểm tra nếu độ dài thành phố < 3 ký tự thì không gửi API
+  if (city.length < 3) {
+    setError("Vui lòng nhập tối thiểu 3 ký tự!");
+    setLoadingCity(false);
+    alert(error);
+    return;
+  }
 
-  //         setTimeout(() => {
-  //           setLoadingCity(false);
-  //           setPlace(respone.data.name);
-  //           setCity("");
-  //         }, 500);
-  //       } catch (error) {
-  //         setLoadingCity(false);
-  //         console.log(error);
-  //       }
-  //     });
-  //   }
-  // }
+  // Gọi API của OpenWeather Map để kiểm tra tên thành phố có tồn tại không
+  const fetchCity = async () => {
+    try {
+      const response = await axios.get(
+        `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}`
+      );
+
+      // Kiểm tra nếu không có dữ liệu trả về thì báo lỗi 
+      if (response.data.length === 0) {
+        setError("Không tìm thấy kết quả nào");
+        // alert("Khong tim thay thanh pho");
+      } else {
+        // Nếu có dữ liệu từ API thì gán dữ liệu City trong ô Search cho biến place 
+        setError("");
+        setPlace(city);
+      }
+    } catch {
+      // Nếu có lỗi xảy ra thì gán lỗi
+      setError("Lỗi kết nối, vui lòng thử lại!");
+    } finally {
+      setLoadingCity(false);
+    }
+  };
+  // Gọi hàm fetchCity
+  fetchCity();
+}
 
   return (
     <>
@@ -136,6 +129,7 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
           </div>
           <section className="flex gap-2 items-center">
             {/* <LanguageSwitch /> */}
+            {/*Button chuyen doi ngon ngu sang tieng viet*/}
             <button
               onClick={() => changeLocale("vi")}
               className={`border p-2 font-bold rounded-md text-sm transition cursor-pointer ${
@@ -146,6 +140,20 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
             >
               VN
             </button>
+            {/* // them button chuyen doi ngon ngu sang tieng trung*/}
+            
+            {/* <button
+              onClick={() => changeLocale("cn")}
+              className={`border p-2 font-bold rounded-md text-sm transition cursor-pointer ${
+                locale === "cn"
+                  ? "bg-blue-500 text-white border-blue-500"
+                  : "bg-white text-black"
+              }`}
+            >
+              CN
+            </button> */}
+
+               {/*Button chuyen doi ngon ngu sang tieng anh*/}
             <button
               onClick={() => changeLocale("en")}
               className={`border p-2 font-bold rounded-md text-sm transition  cursor-pointer ${
@@ -165,23 +173,15 @@ export default function Navbar({ location = "Ho Chi Minh" }: Props) {
             <p className="text-gray-900/80 text-sm">{location}</p>
             <div className="relative hidden md:flex">
               <Searchbox
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                onSubmit={handleSubmitSearch}
+              // ô tìm kiếm cho người dùng nhập thành phố cần tìm
+                value = {city}
+                onChange = {(e) => setCity(e.target.value)}
+                onSubmit = {handleSubmitSearch}
               />
             </div>
           </section>
         </div>
       </nav>
-      <section className="flex max-w-7xl px-3 md:hidden">
-        <div className="relative ">
-          <Searchbox
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            onSubmit={handleSubmitSearch}
-          />
-        </div>
-      </section>
     </>
   );
 }

@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+// (Client) Nhận locale và message từ (server) layout và hiển thị lên giao diện màn hìnhhình
 "use client";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Inter, Roboto_Mono } from "next/font/google";

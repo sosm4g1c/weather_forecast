@@ -2,6 +2,7 @@ import React from "react";
 import { IoSearch } from "react-icons/io5";
 import { cn } from "../utils/cn";
 import { useTranslations } from "next-intl";
+
 type Props = {
   className?: string;
   value: string;
